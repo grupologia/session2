@@ -1,5 +1,7 @@
 ﻿using Pokemon.Services.Models;
 using System.Text.Json;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DocumentModel;
 
 namespace Pokemon.Services;
 
@@ -7,15 +9,25 @@ public class PokemonService
 {
     private readonly HttpClient _client;
     private readonly JsonSerializerOptions _serializeOptions;
+    private Table pokemonTable;
 
     public PokemonService(HttpClient client)
     {
         _client = client;
+        pokemonTable = CreateClient();
+        
         _serializeOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true
         };
+    }
+
+    private Table CreateClient()
+    {
+        var dynamoClient = new AmazonDynamoDBClient();
+        var table = Table.LoadTable(dynamoClient, "nombre");
+        return table;
     }
 
     public async Task<Task> ProcessPokemons()
@@ -71,8 +83,23 @@ public class PokemonService
             Weight = data.Weight,
             Name = data.Name,
             Moves = data.Moves,
-            Types = data.Types,
+            // Types = data.Types,
             UrlAvatar = url,
         };
+    }
+
+    private async Task SavePokemon(PokemonDto pokemon)
+    {
+        var asJson = JsonSerializer.Serialize(pokemon);
+        var doc = Document.FromJson(asJson);
+        doc["Type"] = "META"; 
+        await pokemonTable.PutItemAsync(doc);
+        foreach (var pokemonType in pokemon.Types)
+        {
+            var typeDocument = new Document();
+            typeDocument["Id"] = pokemon.Id;
+            typeDocument["Type"] = pokemonType.Name;
+            await pokemonTable.PutItemAsync(typeDocument);
+        }
     }
 }

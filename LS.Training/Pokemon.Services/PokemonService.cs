@@ -26,7 +26,7 @@ public class PokemonService
     private Table CreateClient()
     {
         var dynamoClient = new AmazonDynamoDBClient();
-        var table = Table.LoadTable(dynamoClient, "temp-demo");
+        var table = Table.LoadTable(dynamoClient, "pokemons");
         return table;
     }
 
@@ -34,10 +34,16 @@ public class PokemonService
     {
         var pokemons = await GetPokemons($"{Constants.ApiURL}/{Constants.PokemonEndpointName}", new List<PokemonDto>());
 
+        //Save pokemons
+        foreach(var pokemon in pokemons)
+        {
+            await SavePokemon(pokemon);
+        }
+
         return Task.CompletedTask;
     }
 
-    public async Task<IEnumerable<PokemonDto>?> GetPokemons(string url, List<PokemonDto> pokemons)
+    public async Task<IEnumerable<PokemonDto>> GetPokemons(string url, List<PokemonDto> pokemons)
     {
         try
         {
@@ -76,14 +82,17 @@ public class PokemonService
 
         var url = (data.Sprites.FrontDefault is not null) ? data.Sprites.FrontDefault.ToString() : "";
 
+        var moves = data.Moves.Select(x => x.MoveMove).Select(x => new MovesDto { Name = x.Name, Url = x.Url.ToString() });
+        var types = data.Types.Select(x => x.Type).Select( x =>  new TypeDto{ Name = x.Name, Url = x.Url.ToString() });
+
         return new PokemonDto()
         {
             Id = data.Id,
             Heigth = data.Height,
             Weight = data.Weight,
             Name = data.Name,
-            Moves = data.Moves,
-            // Types = data.Types,
+            Moves = moves,
+            Types = types,
             UrlAvatar = url,
         };
     }

@@ -26,7 +26,7 @@ public class PokemonService
     private Table CreateClient()
     {
         var dynamoClient = new AmazonDynamoDBClient();
-        var table = Table.LoadTable(dynamoClient, "nombre");
+        var table = Table.LoadTable(dynamoClient, "temp-demo");
         return table;
     }
 

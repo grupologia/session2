@@ -1,8 +1,11 @@
 ﻿using Amazon.Lambda.RuntimeSupport;
+using Pokemon.Services;
 
-var handler = () =>
+var handler = async () =>
 {
-    Console.WriteLine("Hello world");
+    var client = new HttpClient();
+    var service = new PokemonService(client);
+    await service.ProcessPokemons();
 };
 
 await LambdaBootstrapBuilder.Create(handler).Build().RunAsync();

@@ -1,4 +1,6 @@
 ﻿
+using System.Text.Json.Serialization;
+
 namespace Pokemon.Services.Models;
 
 public class PokemonDto

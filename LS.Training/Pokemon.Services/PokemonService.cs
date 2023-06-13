@@ -64,14 +64,17 @@ public class PokemonService
 
         var url = (data.Sprites.FrontDefault is not null) ? data.Sprites.FrontDefault.ToString() : "";
 
+        var moves = data.Moves.Select(x => x.MoveMove).Select(x => new MovesDto { Name = x.Name, Url = x.Url.ToString() });
+        var types = data.Types.Select(x => x.Type).Select( x =>  new TypeDto{ Name = x.Name, Url = x.Url.ToString() });
+
         return new PokemonDto()
         {
             Id = data.Id,
             Heigth = data.Height,
             Weight = data.Weight,
             Name = data.Name,
-            Moves = data.Moves,
-            Types = data.Types,
+            Moves = moves,
+            Types = types,
             UrlAvatar = url,
         };
     }

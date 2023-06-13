@@ -8,6 +8,6 @@ public class PokemonDto
     public long Heigth { get; set; }
     public long Weight { get; set; }
     public string UrlAvatar { get; set; }
-    public IEnumerable<TypeElement> Types { get; set; }
-    public IEnumerable<Move> Moves { get; set; }
+    public IEnumerable<TypeDto> Types { get; set; }
+    public IEnumerable<MovesDto> Moves { get; set; }
 }

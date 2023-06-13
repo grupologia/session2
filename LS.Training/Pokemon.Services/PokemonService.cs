@@ -26,7 +26,7 @@ public class PokemonService
     private Table CreateClient()
     {
         var dynamoClient = new AmazonDynamoDBClient();
-        var table = Table.LoadTable(dynamoClient, "temp-demo");
+        var table = Table.LoadTable(dynamoClient, "pokemons");
         return table;
     }
 
@@ -34,10 +34,16 @@ public class PokemonService
     {
         var pokemons = await GetPokemons($"{Constants.ApiURL}/{Constants.PokemonEndpointName}", new List<PokemonDto>());
 
+        //Save pokemons
+        foreach(var pokemon in pokemons)
+        {
+            await SavePokemon(pokemon);
+        }
+
         return Task.CompletedTask;
     }
 
-    public async Task<IEnumerable<PokemonDto>?> GetPokemons(string url, List<PokemonDto> pokemons)
+    public async Task<IEnumerable<PokemonDto>> GetPokemons(string url, List<PokemonDto> pokemons)
     {
         try
         {
